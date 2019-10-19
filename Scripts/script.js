@@ -13,7 +13,7 @@ function init(){
 }
 
 function resetGame(){
-    contentArea.html("");
+    contentArea.empty();
     timerCount.text(timeLeft);
     let newP = $("<p>");
     newP.text("Welcome to the code quiz, you have 75 seconds to answer 5 questions. Your final score is basedo on your remaining time left. For each incorrect answer you will lose 15 seconds off the timer. Click the button below to get started. Good luck!");   
@@ -46,10 +46,9 @@ function startTimer(){
 function loadNextQuestion(){
     
     if(remainingQuestions.length > 0){
-        contentArea.html("");
+        contentArea.empty();
         
-        let currentQuestion = remainingQuestions.splice(Math.floor(Math.random()*remainingQuestions.length),1)[0];
-        console.log(currentQuestion);
+        let currentQuestion = remainingQuestions.splice(Math.floor(Math.random()*remainingQuestions.length),1)[0];        
         
         let questionTitleLabel = $("<label>");
         
@@ -88,11 +87,35 @@ function checkChoice(response, answer){
 }
 
 function endGame(){
-    let currentScores = JSON.parse(localStorage.getItem("highScores"));
-    let name = prompt("Game over, enter your name");
-    currentScores.push({name,timeLeft});
-    localStorage.setItem(JSON6.stringify(currentScores))
-    alert("game over, your score was: " + timeLeft);
+    
+    contentArea.empty();
+    let newP = $("</p>");
+    newP.text("Game Over, Please enter your Name");
+    contentArea.append(newP);
+    let nameInput = $("<input>");
+    nameInput.attr("type","text");
+    contentArea.append(nameInput);
+    let submitBtn = $("<button>");
+    submitBtn.text("submit");
+    submitBtn.attr("id","submitName");
+    submitBtn.on("click", function(){setHighScores(nameInput.val(), timeLeft)});
+    contentArea.append(submitBtn); 
+    //let name = prompt("Game over, please enter your name");
+    //let name = SetTimeout(function(){return prompt("Game over, enter your name")},1);
+    
+       
 }
-
+function setHighScores(name, score){
+    let currentScores = JSON.parse(localStorage.getItem("highScores"));
+    console.log(currentScores);
+    if(currentScores === null || currentScores == ""){
+        currentScores = [];
+    }
+    currentScores.push({
+        playerName: name,
+        playerScore: score
+    });
+    localStorage.setItem("highScores",JSON.stringify(currentScores));
+    open("highScores.html", "_parent"); 
+}
 init();
