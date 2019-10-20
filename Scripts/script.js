@@ -1,11 +1,16 @@
+
+//set local elements/vairables
 var contentArea = $("#content");
-var numQuestions = questions.length;
 var timerCount = $("#timerCount");
-var startTime = numQuestions * 15;
-var timeLeft = startTime;
-var remainingQuestions = [];
-const wrongResponse = 15;
 var responseArea = $("#responseArea");
+
+const numQuestions = questions.length;
+const startTime = numQuestions * 15;
+const wrongResponse = 15;
+var timeLeft = startTime;
+//used to randomize the questions
+var remainingQuestions = [];
+
 var countdown;
 
 function init(){
@@ -14,33 +19,44 @@ function init(){
 
 function resetGame(){
     contentArea.empty();
+
     timerCount.text(timeLeft);
+
     let newP = $("<p>");
-    newP.text("Welcome to the code quiz, you have 75 seconds to answer 5 questions. Your final score is basedo on your remaining time left. For each incorrect answer you will lose 15 seconds off the timer. Click the button below to get started. Good luck!");   
+    newP.text("Welcome to the code quiz, you have "+startTime+" seconds to answer "+numQuestions+" questions. Your final score is based on your remaining time left. For each incorrect answer you will lose 15 seconds off the timer. Click the button below to get started. Good luck!");   
     contentArea.append(newP);
+
     let startButton = $("<button>");
     startButton.text("Get Started!");
-    startButton.attr("id","getStarted");
-    
+    startButton.attr("id","getStarted");    
     startButton.on("click",function(){
         remainingQuestions = questions;
-        startTimer();
-        loadNextQuestion();
+        startGame();
+        
     });
+
     contentArea.append(startButton);
 }
 
-function startTimer(){
+function startGame(){
     countdown = setInterval(function(){
         timeLeft--;
-        timerCount.text(timeLeft);
-    
-        if(timeLeft === 0){
-            clearInterval(countdown);
-            alert("time's up you lose");
-        }
+        updateTimerText();
 
     },1000);
+    loadNextQuestion();
+}
+
+function updateTimerText(){
+    //timeLeft--;
+    timerCount.text(timeLeft);
+
+    if(timeLeft === 0){
+        clearInterval(countdown);
+        endGame();
+    }else if(timeLeft < 6){
+        timerCount.addClass("timeLow");
+    }
 }
 
 function loadNextQuestion(){
@@ -50,7 +66,7 @@ function loadNextQuestion(){
         
         let currentQuestion = remainingQuestions.splice(Math.floor(Math.random()*remainingQuestions.length),1)[0];        
         
-        let questionTitleLabel = $("<label>");
+        let questionTitleLabel = $("<p>");
         
         questionTitleLabel.text(currentQuestion.title);
         
@@ -67,50 +83,65 @@ function loadNextQuestion(){
             
         });
         
-        contentArea.append(questionTitleLabel);
-        contentArea.append(questionChoicesList);
+        contentArea.append(questionTitleLabel).append(questionChoicesList);
+      
     }else{
         clearInterval(countdown);
+        updateTimerText();
         endGame();
     }
 
 }
 
 function checkChoice(response, answer){
+    
     if(response === answer){
-        responseArea.text("Correct!");
+        responseArea.html("<hr>Correct!");
+        
     }else{
-        responseArea.text("Wrong!");
+        responseArea.html("<hr>Wrong!");
         timeLeft -= wrongResponse;
     }
+    fadeResponseArea();
     loadNextQuestion();
 }
-
+async function fadeResponseArea(){
+    setTimeout(function(){
+        responseArea.empty();
+    },1000)
+}
 function endGame(){
-    
+   
+
+    let score = timeLeft >= 0?timeLeft:0;
     contentArea.empty();
-    let newP = $("</p>");
-    newP.text("Game Over, Please enter your Name");
+
+    let newP = $("<p>");
+    newP.html("Game Over!<br>Your final score is: "+ score + "<br>Please enter your name");
+    
     contentArea.append(newP);
+
     let nameInput = $("<input>");
     nameInput.attr("type","text");
     contentArea.append(nameInput);
-    let submitBtn = $("<button>");
-    submitBtn.text("submit");
-    submitBtn.attr("id","submitName");
-    submitBtn.on("click", function(){setHighScores(nameInput.val(), timeLeft)});
-    contentArea.append(submitBtn); 
-    //let name = prompt("Game over, please enter your name");
-    //let name = SetTimeout(function(){return prompt("Game over, enter your name")},1);
     
+    let submitBtn = $("<button>");
+    submitBtn.text("submit")
+    .attr("id","submitName")
+    .on("click", function(){
+        setHighScores(nameInput.val(), score)
+    });   
+    
+    contentArea.append(submitBtn); 
        
 }
 function setHighScores(name, score){
     let currentScores = JSON.parse(localStorage.getItem("highScores"));
-    console.log(currentScores);
+    
     if(currentScores === null || currentScores == ""){
         currentScores = [];
     }
+    
     currentScores.push({
         playerName: name,
         playerScore: score
