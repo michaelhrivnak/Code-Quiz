@@ -17,7 +17,9 @@ function loadHighScores(){
 }
 function init(){
     loadHighScores();
-
+    $("#back").on("click",function(){
+        open("index.html","_parent");
+    });
     $("#clear").on("click", function(){
         localStorage.removeItem("highScores");
         loadHighScores();
