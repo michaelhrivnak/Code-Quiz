@@ -53,7 +53,7 @@ function updateTimerText(){
     
     timerCount.text(timeLeft);
 
-    if(timeLeft === 0){
+    if(timeLeft <= 0){
         clearInterval(countdown);
         endGame();
     }else if(timeLeft < 6){
@@ -110,6 +110,10 @@ function checkChoice(response, answer){
     }else{
         responseArea.html("<hr>Wrong!");
         timeLeft -= wrongResponse; //remove points for wrong answer
+        //prevents skipping past 0 timer.
+        if(timeLeft <= 0){
+            endGame();
+        }
     }
     fadeResponseArea();
     loadNextQuestion();
